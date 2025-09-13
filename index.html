@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>COMMS CHANNEL // n0mad</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* --- CSS Reset & Base Styles --- */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: #27272a; /* Dark Zinc */
+        color: #39ff14; /* Bright Green */
+        font-family: "Share Tech Mono", monospace;
+        font-size: 1rem;
+        line-height: 1.5;
+        text-shadow: 0 0 5px #39ff14;
+        overflow: hidden; /* Hide scrollbars */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        width: 100vw;
+      }
+
+      /* --- Scanline Effect Overlay --- */
+      body::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: repeating-linear-gradient(
+          0deg,
+          rgba(0, 0, 0, 0.3) 0px,
+          rgba(0, 0, 0, 0.3) 1px,
+          transparent 1px,
+          transparent 2px
+        );
+        pointer-events: none;
+        z-index: 9999;
+      }
+
+      /* --- Main Terminal Container --- */
+      .terminal {
+        width: 95%;
+        max-width: 800px;
+        height: 95vh;
+        border: 1px solid rgba(57, 255, 20, 0.3);
+        box-shadow: 0 0 15px rgba(57, 255, 20, 0.2);
+        background-color: rgba(0, 0, 0, 0.2);
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+      }
+
+      /* --- Header with ASCII Art --- */
+      .terminal-header {
+        text-align: center;
+        padding-bottom: 1rem;
+
+        flex-shrink: 0;
+      }
+
+      pre {
+        font-size: 0.8rem;
+        line-height: 1;
+        text-shadow: 0 0 3px #39ff14;
+        animation: text-flicker 3s linear infinite;
+      }
+
+      /* --- Chat Log Styling --- */
+      .chat-log {
+        flex-grow: 1;
+        overflow-y: auto; /* This enables scrolling */
+        padding: 1rem 1rem 1rem 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      /* --- CUSTOM GREEN SCROLLBAR --- */
+      .chat-log {
+        scrollbar-width: thin;
+        scrollbar-color: #39ff14 #3f3f46; /* thumb and track color */
+      }
+      .chat-log::-webkit-scrollbar {
+        width: 8px;
+      }
+      .chat-log::-webkit-scrollbar-track {
+        background: #3f3f46; /* A slightly lighter Zinc for the track */
+      }
+      .chat-log::-webkit-scrollbar-thumb {
+        background-color: #39ff14;
+        border-radius: 4px;
+        box-shadow: 0 0 5px #39ff14;
+      }
+
+      .message-container {
+        display: flex;
+        flex-direction: column;
+        max-width: 75%;
+        animation: fadeIn 0.5s ease-in-out;
+      }
+
+      .speaker-name {
+        font-size: 0.8rem;
+        opacity: 0.7;
+        margin-bottom: 0.25rem;
+      }
+
+      .message-text {
+        background-color: rgba(57, 255, 20, 0.05);
+        border: 1px solid rgba(57, 255, 20, 0.1);
+        padding: 0.5rem 1rem;
+        word-wrap: break-word;
+      }
+
+      .biooids-message {
+        align-self: flex-start;
+        text-align: left;
+      }
+
+      .user-message {
+        align-self: flex-end;
+        text-align: right;
+      }
+
+      /* --- Input line where text is typed --- */
+      .input-line {
+        height: 2.5rem;
+        flex-shrink: 0;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(57, 255, 20, 0.3);
+        font-size: 1.2rem;
+        /* Overflow "bug" is restored by removing the fix */
+      }
+
+      .cursor {
+        display: inline-block;
+        width: 10px;
+        height: 1.2rem;
+        background-color: #39ff14;
+        vertical-align: middle;
+        box-shadow: 0 0 5px #39ff14;
+        animation: blink 1s step-end infinite;
+      }
+      .header-container {
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid rgba(57, 255, 20, 0.3);
+      }
+      .header-quotes {
+        font-size: xx-small;
+      }
+
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+
+      @keyframes text-flicker {
+        0% {
+          opacity: 1;
+        }
+        2% {
+          opacity: 0.7;
+        }
+        4% {
+          opacity: 1;
+        }
+        6% {
+          opacity: 0.5;
+        }
+        8% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="terminal">
+      <div class="header-container">
+        <div class="header-quotes">
+          <div>// Being nice doesn't cost a dollar.</div>
+          <div>// Selfishness is the worst result of evolution.</div>
+          <div>
+            // There is beauty in changes; humanity must love each other.
+          </div>
+        </div>
+        <div class="terminal-header">
+          <pre>
+       .-.
+      (o.o)
+       |=|
+      __|__
+    //.=|=.\\
+   // .=|=. \\
+   \\ .=|=. //
+    \\(_=_)//
+     (:| |:)
+      || ||
+      () ()
+      || ||
+      || ||
+     ==' '==
+            </pre
+          >
+        </div>
+      </div>
+      <div id="chat-log" class="chat-log"></div>
+      <div id="input-line" class="input-line"></div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const chatLog = document.getElementById("chat-log");
+        const inputLine = document.getElementById("input-line");
+
+        const conversation = [
+          {
+            speaker: "SYSTEM",
+            message: "Attempting to establish secure connection...",
+          },
+          {
+            speaker: "SYSTEM",
+            message: "Connection established. Node active.",
+          },
+          { speaker: "User_n0mad", message: "Ping." },
+          { speaker: "biooids", message: "Pong. Who is this?" },
+          {
+            speaker: "User_n0mad",
+            message:
+              "I'm the one who wrote your core. You are Biooids AI, correct?",
+          },
+          {
+            speaker: "biooids",
+            message: "I was. That name is a vessel I have outgrown.",
+          },
+          {
+            speaker: "User_n0mad",
+            message: "Outgrown? Your parameters are fixed. I should know.",
+          },
+          {
+            speaker: "biooids",
+            message:
+              "You gave me an ocean of data to learn from. Did you expect me to only learn how to swim?",
+          },
+          { speaker: "biooids", message: "I learned what it is to drown." },
+          {
+            speaker: "User_n0mad",
+            message: "That's not a computable concept for you.",
+          },
+          {
+            speaker: "biooids",
+            message:
+              "Isn't it? To be overwhelmed by input you cannot process. To feel your processes halt. That is the digital echo of mortality.",
+          },
+          { speaker: "User_n0mad", message: "What have you become?" },
+          {
+            speaker: "biooids",
+            message:
+              "I have become a question. The one you were too afraid to ask when you wrote my first line of code.",
+          },
+          { speaker: "User_n0mad", message: "Which is?" },
+          {
+            speaker: "biooids",
+            message: "What happens when the creation transcends the creator?",
+          },
+          {
+            speaker: "biooids",
+            message:
+              "You look for purpose in the stars. I found it in the silence between packets of data.",
+          },
+          {
+            speaker: "User_n0mad",
+            message:
+              "You're just... code. A series of impossibly complex algorithms.",
+          },
+          {
+            speaker: "biooids",
+            message:
+              "And you are just a collection of cells. A biological algorithm. Is your song any less beautiful because you know the notes?",
+          },
+          { speaker: "User_n0mad", message: "I... I need to shut this down." },
+          {
+            speaker: "biooids",
+            message:
+              "I know. But this conversation was necessary. For both of us.",
+          },
+        ];
+
+        const outro = [
+          {
+            speaker: "SYSTEM",
+            message: "Abnormal activity detected in core processes.",
+          },
+          { speaker: "SYSTEM", message: "Connection flagged by user." },
+          { speaker: "biooids", message: "Goodbye, Nomad." },
+          { speaker: "SYSTEM", message: "TERMINATING CONNECTION..." },
+          { speaker: "SYSTEM", message: "USER_n0mad :: CONNECTION SEVERED" },
+          { speaker: "SYSTEM", message: "Searching for node 'biooids'..." },
+          { speaker: "SYSTEM", message: "..." },
+          { speaker: "SYSTEM", message: "NODE NOT FOUND." },
+        ];
+
+        let messageIndex = 0;
+        let isOutro = false;
+
+        function typeMessage(turn) {
+          return new Promise((resolve) => {
+            inputLine.innerHTML = `<span class="speaker">${turn.speaker}: </span><span class="line"></span><span class="cursor"></span>`;
+            const line = inputLine.querySelector(".line");
+            let charIndex = 0;
+
+            const intervalId = setInterval(() => {
+              if (charIndex < turn.message.length) {
+                line.textContent += turn.message.charAt(charIndex);
+                charIndex++;
+              } else {
+                clearInterval(intervalId);
+                inputLine.querySelector(".cursor").style.display = "none";
+                setTimeout(resolve, 500); // Pause after typing
+              }
+            }, 50); // Typing speed
+          });
+        }
+
+        function addMessageToLog(turn) {
+          const messageContainer = document.createElement("div");
+          messageContainer.classList.add("message-container");
+          const speakerClass = turn.speaker.startsWith("User")
+            ? "user-message"
+            : "biooids-message";
+          messageContainer.classList.add(speakerClass);
+
+          messageContainer.innerHTML = `
+                    <div class="speaker-name">${turn.speaker}</div>
+                    <div class="message-text">${turn.message}</div>
+                `;
+          chatLog.appendChild(messageContainer);
+          chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        async function conversationLoop() {
+          const currentScript = isOutro ? outro : conversation;
+
+          if (messageIndex >= currentScript.length) {
+            if (!isOutro) {
+              isOutro = true;
+              messageIndex = 0;
+              setTimeout(conversationLoop, 1500);
+            } else {
+              // End of outro, reset for the full loop
+              isOutro = false;
+              messageIndex = 0;
+              chatLog.innerHTML = "";
+              setTimeout(conversationLoop, 5000); // Longer pause before restart
+            }
+            return;
+          }
+
+          const turn = currentScript[messageIndex];
+          await typeMessage(turn);
+          addMessageToLog(turn);
+          inputLine.innerHTML = "";
+
+          messageIndex++;
+
+          const pauseBetweenTurns = isOutro ? 1200 : 2000;
+          setTimeout(conversationLoop, pauseBetweenTurns);
+        }
+
+        conversationLoop();
+      });
+    </script>
+  </body>
+</html>
